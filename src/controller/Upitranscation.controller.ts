@@ -3,7 +3,7 @@ import UpiTransaction from '../models/UpiTransaction.model';
 import generateChecksum from '../utils/checksum';
 import { InitiatePayout } from '../types/PayoutTypes';
 import {InitiateUPIRequestBody, CheckTxnStatusRequestBody} from '../types/initiateUPI';
-
+import { BulkPayout} from '../types/BulkPayout';
 
 
 export const initiateUPIInstant = async (
@@ -305,8 +305,104 @@ export const initiatePayout = async (
     }
   };
 
+  export const initiateBulkPayout = async (
+    req: Request<{}, {}, BulkPayout>,
+    res: Response
+  ): Promise<Response> => {
+    try {
+      const { bulkBatchRefId, payouts } = req.body;
+  
+      if (!bulkBatchRefId || !Array.isArray(payouts) || payouts.length === 0) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'Invalid input',
+          data: { error: 'Missing bulkBatchRefId or payout list is empty' },
+        });
+      }
+  
+      if (bulkBatchRefId.length > 18) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'batchRefId too long',
+          data: { error: 'batchRefId exceeds 18 characters' },
+        });
+      }
+  
+      let addedToBatch = 0;
+      let failedToBatch = 0;
+  
+      for (const payout of payouts) {
+        try {
+          const {
+            merchantTransactionId,
+            amount,
+            beneficiaryAccount,
+            beneficiaryIFSC,
+            beneficiaryName,
+            beneficiaryMobNo,
+            payoutRemark,
+            payoutMode,
+            beneficiaryVPA,
+          } = payout;
+  
+          if (
+            !merchantTransactionId ||
+            !amount ||
+            !beneficiaryAccount ||
+            !beneficiaryIFSC ||
+            !beneficiaryName ||
+            !beneficiaryMobNo ||
+            !payoutRemark ||
+            !payoutMode
+          ) {
+            failedToBatch++;
+            continue;
+          }
+  
+          const txn = new UpiTransaction({
+            bulkBatchRefId,
+            merchantTransactionId,
+            amount,
+            beneficiaryAccount,
+            beneficiaryIFSC,
+            beneficiaryName,
+            beneficiaryMobNo,
+            payoutRemark,
+            payoutMode,
+            beneficiaryVPA,
+            status: 'PENDING',
+          });
+  
+          await txn.save();
+          addedToBatch++;
+        } catch (error) {
+          console.error('Failed to save one payout:', error);
+          failedToBatch++;
+        }
+      }
+  
+      return res.status(200).json({
+        code: '0',
+        msg: 'Processed',
+        data: {
+          total_payouts: payouts.length,
+          added_to_batch: addedToBatch,
+          failed_to_batch: failedToBatch,
+        },
+      });
+    } catch (error: any) {
+      console.error('Bulk payout error:', error);
+      return res.status(500).json({
+        code: '1',
+        msg: 'Server error',
+        data: { error: error.message || 'Unexpected error' },
+      });
+    }
+  };
+
 export default {
   initiateUPIInstant,
   checkTxnStatus,
-  initiatePayout
+  initiatePayout,
+  initiateBulkPayout
 };

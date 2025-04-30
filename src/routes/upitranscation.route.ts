@@ -8,8 +8,8 @@ router.post('/upi/initiate', async (req, res, next) => {
     await initialUPI.initiateUPIInstant(req, res, next);
   } catch (error) {
     res.status(500).json({ 
-      message: "Error processing the request", 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    message: 'Error initiating UPI request',
+    error: error instanceof Error ? error.message : "Unknown error" 
     });
   }
 });
@@ -30,12 +30,24 @@ router.post('/initiatePayout', async (req, res) => {
       await initialUPI.initiatePayout(req, res);
     } catch (error) {
       res.status(500).json({ 
-        message: "Error checking transaction status", 
+        message: 'Error initiating payout',
         error: error instanceof Error ? error.message : "Unknown error" 
       });
     }
   });
 
+
+  router.post('/initiateBulkPayout', async (req, res) => {
+    try {
+      await initialUPI.initiateBulkPayout(req, res);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Error initiating bulk payout',
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+  
   
 
 export default router;
