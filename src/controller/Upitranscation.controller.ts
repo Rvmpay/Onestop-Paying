@@ -1,20 +1,10 @@
 import { Request, Response } from 'express';
 import UpiTransaction from '../models/UpiTransaction.model';
 import generateChecksum from '../utils/checksum';
+import { InitiatePayout } from '../types/PayoutTypes';
+import {InitiateUPIRequestBody, CheckTxnStatusRequestBody} from '../types/initiateUPI';
 
 
-export interface InitiateUPIRequestBody {
-    merchantTransactionId: string;
-    amount: number;
-    name: string;
-    mobile: string;
-    channel: string;
-    checksum: string;
-  }
-  
-  export interface CheckTxnStatusRequestBody {
-    merchantTransactionId: string;
-  }
 
 export const initiateUPIInstant = async (
 req: Request<{}, {}, InitiateUPIRequestBody>, res: Response, next: unknown): Promise<Response> => {
@@ -178,7 +168,145 @@ export const checkTxnStatus = async (
   }
 };
 
+export const initiatePayout = async (
+    req: Request<{}, {}, InitiatePayout>,
+    res: Response
+  ): Promise<Response> => {
+    try {
+      const {
+        merchantTransactionId,
+        amount,
+        channel,
+        payoutType,
+        beneficiaryVPA,
+        beneficiaryAccount,
+        beneficiaryIFSC,
+        name,
+        mobile,
+        payoutRemark,
+        checksum,
+      } = req.body;
+  
+      const merchantId = req.header('X-MERCHANT-ID');
+      const merchantKey = req.header('X-MERCHANT-KEY');
+  
+      if (!merchantId || !merchantKey) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'Missing merchant headers',
+          data: { error: 'Missing X-MERCHANT-ID or X-MERCHANT-KEY' },
+        });
+      }
+  
+      
+      if (
+        !merchantTransactionId ||
+        !amount ||
+        !channel ||
+        !payoutType ||
+        !name ||
+        !mobile ||
+        !payoutRemark ||
+        !checksum
+      ) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'Missing required fields',
+          data: { error: 'Required body parameters missing' },
+        });
+      }
+  
+      if (merchantTransactionId.length > 18) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'Transaction ID too long',
+          data: { error: 'Transaction ID exceeds 18 characters' },
+        });
+      }
+  
+      if (payoutType === 'UPI' && !beneficiaryVPA) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'Missing VPA for UPI payout',
+          data: { error: 'beneficiaryVPA is required for UPI' },
+        });
+      }
+  
+      if (payoutType === 'IMPS' && (!beneficiaryAccount || !beneficiaryIFSC)) {
+        return res.status(400).json({
+          code: '1',
+          msg: 'Missing account/IFSC for IMPS payout',
+          data: { error: 'beneficiaryAccount and beneficiaryIFSC are required for IMPS' },
+        });
+      }
+  
+      // Validate checksum
+      const dataString = `${merchantId}|${merchantTransactionId}|${amount}|${channel}|${payoutType}|${name}|${mobile}`;
+      const expectedChecksum = generateChecksum(dataString, merchantKey);
+      console.log('Expected Checksum:', expectedChecksum);
+      if (checksum !== expectedChecksum) {
+        return res.status(401).json({
+          code: '1',
+          msg: 'Invalid checksum',
+          data: { error: 'Checksum validation failed' },
+        });
+      }
+  
+      const apitxnid = `AP${Date.now()}`;
+      const bankref = `BR${Math.floor(Math.random() * 1_000_000_000_000)}`;
+  
+      const payoutTxn = new UpiTransaction({
+        merchantTransactionId,
+        amount,
+        channel,
+        payoutType,
+        beneficiaryVPA,
+        beneficiaryAccount,
+        beneficiaryIFSC,
+        name,
+        mobile,
+        payoutRemark,
+        checksum,
+        merchantId,
+        apitxnid,
+        bankref,
+      });
+  
+      await payoutTxn.save();
+  
+      return res.status(200).json({
+        code: '0',
+        msg: 'Success',
+        data: {
+          error: '',
+          message: 'Payout initiated successfully.',
+          merchantTransactionId,
+          apitxnid,
+          bankref,
+          amount: amount.toFixed(2),
+          payout_mode: payoutType,
+          name: name,
+          account_no: beneficiaryAccount ?? '',
+          ifsc: beneficiaryIFSC ?? '',
+          mobile: mobile,
+          vpa: beneficiaryVPA ?? '',
+          txn_status: '1',
+          payout_status: 'Success',
+          payout_msg: 'Payout initiated successfully.',
+        },
+      });
+    } catch (error: any) {
+      console.error('Error initiating payout:', error);
+      return res.status(500).json({
+        code: '1',
+        msg: 'Server error',
+        data: { error: error.message || 'Unexpected error' },
+      });
+    }
+  };
+
 export default {
   initiateUPIInstant,
-  checkTxnStatus
+  checkTxnStatus,
+  initiatePayout
 };

@@ -25,4 +25,17 @@ router.post('/checkTxnStatus', async (req, res) => {
   }
 });
 
+router.post('/initiatePayout', async (req, res) => {
+    try {
+      await initialUPI.initiatePayout(req, res);
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Error checking transaction status", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
+  
+
 export default router;

@@ -10,6 +10,7 @@ const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
 app.use(express.json());
 app.use('/api/v1/pg', upiRoutes);
+app.use('/api/v1/payout', upiRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

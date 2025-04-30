@@ -6,6 +6,11 @@ interface IUpiTransaction extends Document {
   name: string;
   mobile: string;
   channel: string;
+  payoutType: string;
+  beneficiaryVPA?: string;
+  beneficiaryAccount?: string;
+  beneficiaryIFSC?: string;
+  payoutRemark: string;
   checksum: string;
   merchantId: string;
   apitxnid?: string;
@@ -21,6 +26,10 @@ const upiTransactionSchema = new mongoose.Schema({
     merchantTransactionId: { type: String, required: true, maxlength: 18, unique: true },
     amount: { type: Number, required: true },
     name: { type: String, required: true },
+    payoutType: {type:String},
+    beneficiaryVPA: {type:String},
+    beneficiaryAccount: {type:String},
+    beneficiaryIFSC: {type:String},
     mobile: { type: String, required: true },
     channel: { type: String, required: true },
     checksum: { type: String, required: true },
