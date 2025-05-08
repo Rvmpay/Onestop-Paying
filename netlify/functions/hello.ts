@@ -1,11 +1,11 @@
-// netlify/functions/hello.ts
-import { Handler } from '@netlify/functions';
+import express from 'express';
+import serverless from 'serverless-http';
+import upiRoutes from '../../src/routes/upitranscation.route'; // adjust path
 
-const handler: Handler = async (event, context) => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: "Hello from Netlify!" }),
-  };
-};
+const app = express();
+app.use(express.json());
 
-export { handler };
+app.use('/api/v1/pg', upiRoutes);
+app.use('/api/v1/payout', upiRoutes);
+
+export const handler = serverless(app);
