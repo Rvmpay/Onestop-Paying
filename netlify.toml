@@ -1,5 +1,6 @@
 [build]
-  publish = "dist"
-  
-[functions]
-  directory = "dist/functions"  # ✅ where compiled functions go
+  publish = "dist"   # This is where your static files will go
+  functions = "dist/functions"   # Make sure this points to your compiled functions
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
