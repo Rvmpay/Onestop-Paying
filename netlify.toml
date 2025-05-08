@@ -1,6 +1,5 @@
 [build]
   publish = "dist"
-  functions = "netlify/functions"
-
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
+  
+[functions]
+  directory = "dist/functions"  # ✅ where compiled functions go

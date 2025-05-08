@@ -7,6 +7,6 @@
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/functions/**/*.ts"],  // ✅ added this line
   "exclude": ["node_modules"]
 }
