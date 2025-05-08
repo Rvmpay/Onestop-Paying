@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "CommonJS",
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "./dist", // Output compiled files here
+    "rootDir": "./", // Ensure this encompasses all source files
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["src/**/*.ts", "src/functions/**/*.ts"],  // ✅ added this line
+  "include": ["netlify/functions/**/*.ts"],
   "exclude": ["node_modules"]
 }

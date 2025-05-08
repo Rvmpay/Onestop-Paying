@@ -1,4 +1,5 @@
 {
+	"siteId": "f4d50c9a-7bf5-4266-8393-79dcfcee481d",
 	"geolocation": {
 		"data": {
 			"city": "Ahmedabad",
@@ -15,7 +16,6 @@
 			"longitude": 72.5871,
 			"postalCode": "380001"
 		},
-		"timestamp": 1746691020563
-	},
-	"siteId": "f4d50c9a-7bf5-4266-8393-79dcfcee481d"
+		"timestamp": 1746708690367
+	}
 }

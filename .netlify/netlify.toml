@@ -1,17 +1,13 @@
-functionsDirectory = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/dist/functions"
-functionsDirectoryOrigin = "config"
+functionsDirectory = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/netlify/functions-build"
+functionsDirectoryOrigin = "config-v1"
 plugins = []
 headers = []
 redirects = []
 
-[functions]
-
-[functions."*"]
-
 [build]
 publish = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/dist"
 publishOrigin = "config"
-functions = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/dist/functions"
+functions = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/netlify/functions-build"
 
 [build.environment]
 
@@ -26,3 +22,7 @@ functions = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/dist/functions"
 [build.processing.js]
 
 [build.services]
+
+[functions]
+
+[functions."*"]
