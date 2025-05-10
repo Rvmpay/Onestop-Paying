@@ -21,13 +21,15 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
             throw new Error("MONGO_URI environment variable is not defined.");
         }
         yield mongoose_1.default.connect(mongoURI, {
-        // Removed deprecated options as they are defaults in Mongoose
+        // useNewUrlParser: true,
+        // useUnifiedTopology: true,
         });
         console.log("MongoDB connected");
     }
     catch (error) {
-        console.error("Error connecting to MongoDB", error);
-        process.exit(1);
+        console.error("Error connecting to MongoDB:", error.message);
+        console.error("Full error:", error);
+        process.exit(1); // Exit the process if the connection fails
     }
 });
 exports.connectDB = connectDB;
