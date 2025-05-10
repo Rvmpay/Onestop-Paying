@@ -18,7 +18,7 @@ app.get('/api/health', (req, res) => {
     res.status(200).send('OK');
 });
 // Catch-all route for undefined paths
-app.all('/api/*', (req, res) => {
+app.all('/api', (req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 if (process.env.NETLIFY_DEV !== 'true') {
