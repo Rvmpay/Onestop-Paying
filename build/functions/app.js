@@ -7,6 +7,12 @@ exports.handler = void 0;
 const serverless_http_1 = __importDefault(require("serverless-http"));
 const express_1 = __importDefault(require("express"));
 const server_1 = __importDefault(require("../src/server"));
-// Ensure body parsing works in serverless environments
-server_1.default.use(express_1.default.json());
+const cors_1 = __importDefault(require("cors"));
+const app = (0, express_1.default)();
+app.use((0, cors_1.default)({
+    origin: 'https://onestop-api.netlify.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+app.use(express_1.default.json());
 exports.handler = (0, serverless_http_1.default)(server_1.default);

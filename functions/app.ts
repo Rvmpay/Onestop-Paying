@@ -1,8 +1,15 @@
 import serverless from 'serverless-http';
 import express from 'express';
-import app from '../src/server';
+import server from '../src/server';
+import cors from 'cors';
+const app = express();
 
-// Ensure body parsing works in serverless environments
+app.use(cors({
+  origin: 'https://onestop-api.netlify.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 app.use(express.json());
 
-export const handler = serverless(app);
+export const handler = serverless(server);

@@ -1,13 +1,18 @@
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import upiRoutes from './routes/upitranscation.route';
+import cors from 'cors';
 import connectDB from './lib/db';
 
 dotenv.config();
 
 const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
-
+app.use(cors({
+  origin: 'http://localhost:8888', // Replace with your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 app.use(express.json());
 app.use('/api/v1/pg', upiRoutes);
 app.use('/api/v1/payout', upiRoutes);
@@ -22,12 +27,16 @@ app.all('/api', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-if (process.env.NETLIFY_DEV !== 'true') {
+if (process.env.NETLIFY_DEV === 'true') {
+  console.log('Running in Netlify Dev environment');
+  connectDB();
+} else {
+  connectDB();
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-    console.log(`http://localhost:${PORT}`);
-    connectDB();
   });
+  console.log('Running in production environment');
 }
+
 
 export default app;
