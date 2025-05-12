@@ -1,15 +1,23 @@
+// netlify/functions/app.ts
 import serverless from 'serverless-http';
-import express from 'express';
-import server from '../src/server';
-import cors from 'cors';
-const app = express();
+import app from '../src/server';
 
-app.use(cors({
-  origin: 'https://onestop-api.netlify.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+export const handler = serverless(app);
 
-app.use(express.json());
 
-export const handler = serverless(server);
+
+// YOUR_BASE_DIRECTORY/netlify/functions/api.ts
+
+// import express, { Router } from "express";
+// import serverless from "serverless-http";
+// import app from '../src/server';
+// const api = express();
+
+// const router = Router();
+// router.get("/hello", (req, res) => {
+// 	res.send("Hello World!");
+// });
+
+// api.use("/api/", router);
+
+// export const handler = serverless(app);

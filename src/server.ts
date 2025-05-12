@@ -8,12 +8,12 @@ dotenv.config();
 
 const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
+app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:8888', // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: false
 }));
-app.use(express.json());
 app.use('/api/v1/pg', upiRoutes);
 app.use('/api/v1/payout', upiRoutes);
 
@@ -40,3 +40,5 @@ if (process.env.NETLIFY_DEV === 'true') {
 
 
 export default app;
+
+

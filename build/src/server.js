@@ -11,12 +11,12 @@ const db_1 = __importDefault(require("./lib/db"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = parseInt(process.env.PORT || '3000', 10);
+app.use(express_1.default.json());
 app.use((0, cors_1.default)({
     origin: 'http://localhost:8888', // Replace with your frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+    credentials: false
 }));
-app.use(express_1.default.json());
 app.use('/api/v1/pg', upitranscation_route_1.default);
 app.use('/api/v1/payout', upitranscation_route_1.default);
 // Health check route

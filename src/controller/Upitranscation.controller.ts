@@ -20,7 +20,7 @@ req: Request<{}, {}, InitiateUPIRequestBody>, res: Response, next: unknown): Pro
 
     const merchantId = req.header('X-MERCHANT-ID');
     const merchantKey = req.header('X-MERCHANT-KEY');
-
+    console.log("Merchant ID:", merchantTransactionId);
     if (!merchantId || !merchantKey) {
       return res.status(400).json({
         code: "1",

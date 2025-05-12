@@ -20,6 +20,7 @@ const initiateUPIInstant = (req, res, next) => __awaiter(void 0, void 0, void 0,
         const { merchantTransactionId, amount, name, mobile, channel, checksum } = req.body;
         const merchantId = req.header('X-MERCHANT-ID');
         const merchantKey = req.header('X-MERCHANT-KEY');
+        console.log("Merchant ID:", merchantTransactionId);
         if (!merchantId || !merchantKey) {
             return res.status(400).json({
                 code: "1",

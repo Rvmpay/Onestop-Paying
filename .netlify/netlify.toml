@@ -1,7 +1,7 @@
-redirectsOrigin = "config"
-plugins = []
 functionsDirectory = "/Users/rvmpay/Downloads/Farhan/One-Stop-API/functions"
 functionsDirectoryOrigin = "config-v1"
+redirectsOrigin = "config"
+plugins = []
 headers = []
 
 [functions]

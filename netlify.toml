@@ -1,8 +1,8 @@
 [build]
   functions = "functions"
-
+  external_node_modules = ["express", "cors", "mongoose", "dotenv", "serverless-http"]
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/app/:splat"
+  to = "/.netlify/functions/app"
   status = 200
 
