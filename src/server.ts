@@ -27,7 +27,7 @@ app.all('/api', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-if (process.env.NETLIFY_DEV === 'true') {
+if (process.env.NETLIFY_DEV !== 'true') {
   console.log('Running in Netlify Dev environment');
   connectDB();
 } else {
