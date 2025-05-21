@@ -1,0 +1,386 @@
+{
+	"info": {
+		"_postman_id": "633fc299-4b19-418f-85de-ea8e4af21eb6",
+		"name": "Onestop Payin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43908279",
+		"_collection_link": "https://farhanpatel-5002272.postman.co/workspace/Farhan-Patel's-Workspace~49d25352-a80a-42ac-8ec7-8d9fd8dd8351/collection/43908279-633fc299-4b19-418f-85de-ea8e4af21eb6?action=share&source=collection_link&creator=43908279"
+	},
+	"item": [
+		{
+			"name": "initiateUPIIntant",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Response contains code '0'\", function () {",
+							"    pm.expect(json.code).to.eql(\"0\");",
+							"});",
+							"",
+							"pm.test(\"Message is 'Processed'\", function () {",
+							"    pm.expect(json.msg).to.eql(\"Processed\");",
+							"});",
+							"",
+							"pm.test(\"Data object has required fields\", function () {",
+							"    pm.expect(json.data).to.have.property(\"merchantTransactionId\");",
+							"    pm.expect(json.data).to.have.property(\"apitxnid\");",
+							"    pm.expect(json.data).to.have.property(\"amount\");",
+							"    pm.expect(json.data).to.have.property(\"paymentUrl\");",
+							"});",
+							"",
+							"pm.test(\"paymentUrl is a valid UPI URL\", function () {",
+							"    pm.expect(json.data.paymentUrl).to.match(/^upi:\\/\\//);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-MERCHANT-ID",
+						"value": "testmerchant",
+						"type": "text"
+					},
+					{
+						"key": "X-MERCHANT-KEY",
+						"value": "testkey123",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"merchantTransactionId\": \"txn001162361\",\n  \"amount\": 100.00,\n  \"name\": \"Farhan Patel\",\n  \"mobile\": \"9876543210\",\n  \"channel\": \"PT1\",\n  \"checksum\": \"9ab9b88f849f020d0582b5d5988e8357c50496d3c55da8a4943d927619fab3cc\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/pg/upi/initiate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"pg",
+						"upi",
+						"initiate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Top-level fields are correct\", function () {",
+							"    pm.expect(json.code).to.eql(\"0\");",
+							"    pm.expect(json.msg).to.eql(\"Processed\");",
+							"});",
+							"",
+							"pm.test(\"Data object has required fields\", function () {",
+							"    const data = json.data;",
+							"",
+							"    pm.expect(data).to.have.property(\"merchantTransactionId\");",
+							"    pm.expect(data).to.have.property(\"apitxnid\");",
+							"    pm.expect(data).to.have.property(\"txnrefid\");",
+							"    pm.expect(data).to.have.property(\"bankref\");",
+							"    pm.expect(data).to.have.property(\"amount\");",
+							"    pm.expect(data).to.have.property(\"payin_mode\");",
+							"    pm.expect(data).to.have.property(\"txn_status\");",
+							"    pm.expect(data).to.have.property(\"payin_status\");",
+							"    pm.expect(data).to.have.property(\"payin_msg\");",
+							"    pm.expect(data).to.have.property(\"payee_vpa\");",
+							"    pm.expect(data).to.have.property(\"payee_account_name\");",
+							"    pm.expect(data).to.have.property(\"payee_account_no\");",
+							"    pm.expect(data).to.have.property(\"payee_ifsc\");",
+							"});",
+							"",
+							"pm.test(\"Transaction was successful\", function () {",
+							"    const data = json.data;",
+							"    pm.expect(data.txn_status).to.eql(\"1\");",
+							"    pm.expect(data.payin_status).to.eql(\"SUCCESS\");",
+							"    pm.expect(data.payin_msg).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.test(\"Amount is numeric string\", function () {",
+							"    const amount = json.data.amount;",
+							"    pm.expect(amount).to.match(/^\\d+(\\.\\d{1,2})?$/);",
+							"});",
+							"",
+							"pm.test(\"payee_vpa is a valid VPA\", function () {",
+							"    const vpa = json.data.payee_vpa;",
+							"    pm.expect(vpa).to.match(/^[\\w.-]+@[\\w.-]+$/);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-MERCHANT-ID",
+						"value": "testmerchant",
+						"type": "text"
+					},
+					{
+						"key": "X-MERCHANT-KEY",
+						"value": "testkey123",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"merchantTransactionId\":\"txn001161\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/pg/checkTxnStatus",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"pg",
+						"checkTxnStatus"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "initiatePayout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const data = json.data;",
+							"",
+							"pm.test(\"Top-level fields are correct\", function () {",
+							"    pm.expect(json.code).to.eql(\"0\");",
+							"    pm.expect(json.msg).to.eql(\"Success\");",
+							"});",
+							"",
+							"pm.test(\"Data contains all required fields\", function () {",
+							"    const expectedFields = [",
+							"        \"error\",",
+							"        \"message\",",
+							"        \"merchantTransactionId\",",
+							"        \"apitxnid\",",
+							"        \"bankref\",",
+							"        \"amount\",",
+							"        \"payout_mode\",",
+							"        \"name\",",
+							"        \"account_no\",",
+							"        \"ifsc\",",
+							"        \"mobile\",",
+							"        \"vpa\",",
+							"        \"txn_status\",",
+							"        \"payout_status\",",
+							"        \"payout_msg\"",
+							"    ];",
+							"",
+							"    expectedFields.forEach(field => {",
+							"        pm.expect(data).to.have.property(field);",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"Transaction and payout status are successful\", function () {",
+							"    pm.expect(data.txn_status).to.eql(\"1\");",
+							"    pm.expect(data.payout_status.toLowerCase()).to.eql(\"success\");",
+							"    pm.expect(data.payout_msg).to.include(\"Payout initiated\");",
+							"});",
+							"",
+							"pm.test(\"Amount is a valid number string\", function () {",
+							"    pm.expect(data.amount).to.match(/^\\d+(\\.\\d{1,2})?$/);",
+							"});",
+							"",
+							"pm.test(\"Mobile number is 10 digits\", function () {",
+							"    pm.expect(data.mobile).to.match(/^\\d{10}$/);",
+							"});",
+							"",
+							"pm.test(\"IFSC code is valid format\", function () {",
+							"    pm.expect(data.ifsc).to.match(/^[A-Z]{4}0[A-Z0-9]{6}$/);",
+							"});",
+							"",
+							"pm.test(\"Account number is numeric\", function () {",
+							"    pm.expect(data.account_no).to.match(/^\\d+$/);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-MERCHANT-ID",
+						"value": "testmerchant",
+						"type": "text"
+					},
+					{
+						"key": "X-MERCHANT-KEY",
+						"value": "testkey123",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"merchantTransactionId\": \"txxn0011929\",\n  \"amount\": 100.00,\n  \"payoutType\": \"IMPS\",\n  \"beneficiaryAccount\": \"156600704343\",\n  \"beneficiaryIFSC\": \"IBKL0000222\",\n  \"beneficiaryName\": \"Test User\",\n  \"beneficiaryMobNo\": \"9876543210\",\n  \"payoutRemark\": \"Test from API\",\n  \"channel\":\"PT1\",\n  \"mobile\":\"9876543210\",\n  \"name\":\"Farhan Patel\",\n  \"checksum\": \"2114332f0bb4fed44022d10b278b91aaedeebf473c737e0341265c703915a217\"\n}   \n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/payout/initiatePayout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"payout",
+						"initiatePayout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "InitiateBulkPayout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const data = json.data;",
+							"",
+							"pm.test(\"Response has correct status code and message\", function () {",
+							"    pm.expect(json.code).to.eql(\"0\");",
+							"    pm.expect(json.msg).to.eql(\"Processed\");",
+							"});",
+							"",
+							"pm.test(\"Response data has required fields\", function () {",
+							"    pm.expect(data).to.have.property(\"total_payouts\");",
+							"    pm.expect(data).to.have.property(\"added_to_batch\");",
+							"    pm.expect(data).to.have.property(\"failed_to_batch\");",
+							"});",
+							"",
+							"pm.test(\"Payout added successfully\", function () {",
+							"    pm.expect(data.total_payouts).to.eql(1);",
+							"    pm.expect(data.added_to_batch).to.eql(1);",
+							"    pm.expect(data.failed_to_batch).to.eql(0);",
+							"});",
+							"",
+							"pm.test(\"Validate types of response values\", function () {",
+							"    pm.expect(data.total_payouts).to.be.a(\"number\");",
+							"    pm.expect(data.added_to_batch).to.be.a(\"number\");",
+							"    pm.expect(data.failed_to_batch).to.be.a(\"number\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-MERCHANT-ID",
+						"value": "testmerchant",
+						"type": "text"
+					},
+					{
+						"key": "X-MERCHANT-KEY",
+						"value": "testkey123",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"bulkBatchRefId\": \"100100193\",\n  \"payouts\": [\n    {\n        \"merchantTransactionId\": \"txn00112311\",\n        \"amount\": 3.0,\n        \"beneficiaryAccount\": \"15660070443\",\n        \"beneficiaryIFSC\": \"IBKL0000222\",\n        \"name\": \"Test User\",\n        \"mobile\": \"9876543210\",\n        \"payoutRemark\": \"Test from API\",\n        \"payoutMode\": \"IMPS\",\n        \"beneficiaryVPA\": \"example@upi\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/payout/initiateBulkPayout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"payout",
+						"initiateBulkPayout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

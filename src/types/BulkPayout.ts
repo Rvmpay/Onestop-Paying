@@ -1,11 +1,11 @@
 // types/BulkPayoutTypes.ts
 export interface PayoutItem {
-    merchantTransactionId: string;
+  merchantTransactionId: string;
     amount: number;
     beneficiaryAccount: string;
     beneficiaryIFSC: string;
-    beneficiaryName: string;
-    beneficiaryMobNo: string;
+    name: string;
+    mobile: string;
     payoutRemark: string;
     payoutMode: 'UPI' | 'IMPS';
     beneficiaryVPA?: string;

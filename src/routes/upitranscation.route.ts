@@ -37,9 +37,8 @@ router.post('/initiatePayout', async (req, res) => {
   });
 
 
-  router.post('/initiateBulkPayout', async (req, res) => {
+router.post('/initiateBulkPayout', async (req, res) => {
     try {
-      await initialUPI.initiateBulkPayout(req, res);
       await initialUPI.initiateBulkPayout(req, res);
     } catch (error) {
       res.status(500).json({ 

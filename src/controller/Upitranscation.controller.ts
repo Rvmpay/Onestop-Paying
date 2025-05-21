@@ -241,7 +241,7 @@ export const initiatePayout = async (
       }
   
       // Validate checksum
-      const dataString = `${merchantId}|${merchantTransactionId}|${amount}|${channel}|${payoutType}|${name}|${mobile}`;
+      const dataString = `${merchantTransactionId}|${amount}|${channel}|${payoutType}|${name}|${mobile}`;
       const expectedChecksum = generateChecksum(dataString, merchantKey);
       console.log('Expected Checksum:', expectedChecksum);
       if (checksum !== expectedChecksum) {
@@ -338,35 +338,40 @@ export const initiatePayout = async (
             amount,
             beneficiaryAccount,
             beneficiaryIFSC,
-            beneficiaryName,
-            beneficiaryMobNo,
+            name,
+            mobile,
             payoutRemark,
             payoutMode,
             beneficiaryVPA,
           } = payout;
   
+          console.log('Validating payout:', payout);
+          
           if (
             !merchantTransactionId ||
-            !amount ||
+            amount === undefined || amount === null || isNaN(Number(amount)) ||
             !beneficiaryAccount ||
             !beneficiaryIFSC ||
-            !beneficiaryName ||
-            !beneficiaryMobNo ||
+            !name ||
+            !mobile ||
             !payoutRemark ||
             !payoutMode
           ) {
+            console.log('--->',merchantTransactionId, amount, beneficiaryAccount, beneficiaryIFSC, name, mobile, payoutRemark, payoutMode);
+            console.warn('Payout failed validation:', payout);
             failedToBatch++;
             continue;
           }
   
           const txn = new UpiTransaction({
             bulkBatchRefId,
+            
             merchantTransactionId,
             amount,
             beneficiaryAccount,
             beneficiaryIFSC,
-            beneficiaryName,
-            beneficiaryMobNo,
+            name,
+            mobile,
             payoutRemark,
             payoutMode,
             beneficiaryVPA,
@@ -375,8 +380,8 @@ export const initiatePayout = async (
   
           await txn.save();
           addedToBatch++;
-        } catch (error) {
-          console.error('Failed to save one payout:', error);
+        } catch (error: any) {
+          console.error('Failed to save one payout:', error?.message || error);
           failedToBatch++;
         }
       }
@@ -391,14 +396,15 @@ export const initiatePayout = async (
         },
       });
     } catch (error: any) {
-      console.error('Bulk payout error:', error);
+      console.error('Bulk payout error:', error?.message || error);
       return res.status(500).json({
         code: '1',
         msg: 'Server error',
-        data: { error: error.message || 'Unexpected error' },
+        data: { error: error?.message || 'Unexpected error' },
       });
     }
   };
+  
 
 export default {
   initiateUPIInstant,
