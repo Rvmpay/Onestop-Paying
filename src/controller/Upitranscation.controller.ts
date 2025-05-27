@@ -7,20 +7,22 @@ import { BulkPayout} from '../types/BulkPayout';
 
 
 export const initiateUPIInstant = async (
-req: Request<{}, {}, InitiateUPIRequestBody>, res: Response, next: unknown): Promise<Response> => {
+  req: Request<{}, {}, Omit<InitiateUPIRequestBody, 'checksum'>>, // Remove checksum from req body type
+  res: Response,
+  next: unknown
+): Promise<Response> => {
   try {
     const {
       merchantTransactionId,
       amount,
       name,
       mobile,
-      channel,
-      checksum
+      channel
     } = req.body;
 
     const merchantId = req.header('X-MERCHANT-ID');
     const merchantKey = req.header('X-MERCHANT-KEY');
-    console.log("Merchant ID:", merchantTransactionId);
+
     if (!merchantId || !merchantKey) {
       return res.status(400).json({
         code: "1",
@@ -29,7 +31,7 @@ req: Request<{}, {}, InitiateUPIRequestBody>, res: Response, next: unknown): Pro
       });
     }
 
-    if (!merchantTransactionId || !amount || !name || !mobile || !channel || !checksum) {
+    if (!merchantTransactionId || !amount || !name || !mobile || !channel) {
       return res.status(400).json({
         code: "1",
         msg: "Missing required fields",
@@ -44,18 +46,8 @@ req: Request<{}, {}, InitiateUPIRequestBody>, res: Response, next: unknown): Pro
         data: { error: "Transaction ID exceeds 18 characters" }
       });
     }
-
     const dataString = `${merchantId}|${merchantTransactionId}|${amount}|${channel}|${name}|${mobile}`;
-    const expectedChecksum = generateChecksum(dataString, merchantKey);
-    console.log("Expected Checksum:", expectedChecksum);
-
-    if (checksum !== expectedChecksum) {
-      return res.status(401).json({
-        code: "1",
-        msg: "Invalid checksum",
-        data: { error: "Checksum validation failed" }
-      });
-    }
+    const checksum = generateChecksum(dataString, merchantKey);
 
     const apitxnid = `2TXNP${Date.now()}`;
     const tid = `SUR${Math.floor(Math.random() * 1_000_000_000_000)}`;
@@ -86,7 +78,8 @@ req: Request<{}, {}, InitiateUPIRequestBody>, res: Response, next: unknown): Pro
         merchantTransactionId,
         apitxnid,
         amount: amount.toFixed(2),
-        paymentUrl
+        paymentUrl,
+        // checksum, 
       }
     });
 
@@ -184,7 +177,6 @@ export const initiatePayout = async (
         name,
         mobile,
         payoutRemark,
-        checksum,
       } = req.body;
   
       const merchantId = req.header('X-MERCHANT-ID');
@@ -206,8 +198,7 @@ export const initiatePayout = async (
         !payoutType ||
         !name ||
         !mobile ||
-        !payoutRemark ||
-        !checksum
+        !payoutRemark
       ) {
         return res.status(400).json({
           code: '1',
@@ -242,15 +233,15 @@ export const initiatePayout = async (
   
       // Validate checksum
       const dataString = `${merchantTransactionId}|${amount}|${channel}|${payoutType}|${name}|${mobile}`;
-      const expectedChecksum = generateChecksum(dataString, merchantKey);
-      console.log('Expected Checksum:', expectedChecksum);
-      if (checksum !== expectedChecksum) {
-        return res.status(401).json({
-          code: '1',
-          msg: 'Invalid checksum',
-          data: { error: 'Checksum validation failed' },
-        });
-      }
+      const checksum = generateChecksum(dataString, merchantKey);
+      // console.log('Expected Checksum:', expectedChecksum);
+      // if (checksum !== expectedChecksum) {
+      //   return res.status(401).json({
+      //     code: '1',
+      //     msg: 'Invalid checksum',
+      //     data: { error: 'Checksum validation failed' },
+      //   });
+      // }
   
       const apitxnid = `AP${Date.now()}`;
       const bankref = `BR${Math.floor(Math.random() * 1_000_000_000_000)}`;

@@ -33,8 +33,8 @@ if (process.env.NETLIFY_DEV !== 'true') {
 }
 else {
     (0, db_1.default)();
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
+    app.listen(3000, '0.0.0.0', () => {
+        console.log('Server is running on port 3000');
     });
     console.log('Running in production environment');
 }

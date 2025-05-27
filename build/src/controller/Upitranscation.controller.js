@@ -15,12 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.initiateBulkPayout = exports.initiatePayout = exports.checkTxnStatus = exports.initiateUPIInstant = void 0;
 const UpiTransaction_model_1 = __importDefault(require("../models/UpiTransaction.model"));
 const checksum_1 = __importDefault(require("../utils/checksum"));
-const initiateUPIInstant = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const initiateUPIInstant = (req, // Remove checksum from req body type
+res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { merchantTransactionId, amount, name, mobile, channel, checksum } = req.body;
+        const { merchantTransactionId, amount, name, mobile, channel } = req.body;
         const merchantId = req.header('X-MERCHANT-ID');
         const merchantKey = req.header('X-MERCHANT-KEY');
-        console.log("Merchant ID:", merchantTransactionId);
         if (!merchantId || !merchantKey) {
             return res.status(400).json({
                 code: "1",
@@ -28,7 +28,7 @@ const initiateUPIInstant = (req, res, next) => __awaiter(void 0, void 0, void 0,
                 data: { error: "Missing headers" }
             });
         }
-        if (!merchantTransactionId || !amount || !name || !mobile || !channel || !checksum) {
+        if (!merchantTransactionId || !amount || !name || !mobile || !channel) {
             return res.status(400).json({
                 code: "1",
                 msg: "Missing required fields",
@@ -43,15 +43,7 @@ const initiateUPIInstant = (req, res, next) => __awaiter(void 0, void 0, void 0,
             });
         }
         const dataString = `${merchantId}|${merchantTransactionId}|${amount}|${channel}|${name}|${mobile}`;
-        const expectedChecksum = (0, checksum_1.default)(dataString, merchantKey);
-        console.log("Expected Checksum:", expectedChecksum);
-        if (checksum !== expectedChecksum) {
-            return res.status(401).json({
-                code: "1",
-                msg: "Invalid checksum",
-                data: { error: "Checksum validation failed" }
-            });
-        }
+        const checksum = (0, checksum_1.default)(dataString, merchantKey);
         const apitxnid = `2TXNP${Date.now()}`;
         const tid = `SUR${Math.floor(Math.random() * 1000000000000)}`;
         const paymentUrl = `upi://pay?cu=INR&pa=onestopshopping@suryoday&pn=ONE STOP SHOPPING STATION PVT LTD&am=${amount}&tid=${tid}&tr=${merchantTransactionId}&mc=5816&tn=${merchantTransactionId}`;
@@ -77,7 +69,8 @@ const initiateUPIInstant = (req, res, next) => __awaiter(void 0, void 0, void 0,
                 merchantTransactionId,
                 apitxnid,
                 amount: amount.toFixed(2),
-                paymentUrl
+                paymentUrl,
+                // checksum, 
             }
         });
     }
@@ -151,7 +144,7 @@ const checkTxnStatus = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.checkTxnStatus = checkTxnStatus;
 const initiatePayout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { merchantTransactionId, amount, channel, payoutType, beneficiaryVPA, beneficiaryAccount, beneficiaryIFSC, name, mobile, payoutRemark, checksum, } = req.body;
+        const { merchantTransactionId, amount, channel, payoutType, beneficiaryVPA, beneficiaryAccount, beneficiaryIFSC, name, mobile, payoutRemark, } = req.body;
         const merchantId = req.header('X-MERCHANT-ID');
         const merchantKey = req.header('X-MERCHANT-KEY');
         if (!merchantId || !merchantKey) {
@@ -167,8 +160,7 @@ const initiatePayout = (req, res) => __awaiter(void 0, void 0, void 0, function*
             !payoutType ||
             !name ||
             !mobile ||
-            !payoutRemark ||
-            !checksum) {
+            !payoutRemark) {
             return res.status(400).json({
                 code: '1',
                 msg: 'Missing required fields',
@@ -197,16 +189,16 @@ const initiatePayout = (req, res) => __awaiter(void 0, void 0, void 0, function*
             });
         }
         // Validate checksum
-        const dataString = `${merchantId}|${merchantTransactionId}|${amount}|${channel}|${payoutType}|${name}|${mobile}`;
-        const expectedChecksum = (0, checksum_1.default)(dataString, merchantKey);
-        console.log('Expected Checksum:', expectedChecksum);
-        if (checksum !== expectedChecksum) {
-            return res.status(401).json({
-                code: '1',
-                msg: 'Invalid checksum',
-                data: { error: 'Checksum validation failed' },
-            });
-        }
+        const dataString = `${merchantTransactionId}|${amount}|${channel}|${payoutType}|${name}|${mobile}`;
+        const checksum = (0, checksum_1.default)(dataString, merchantKey);
+        // console.log('Expected Checksum:', expectedChecksum);
+        // if (checksum !== expectedChecksum) {
+        //   return res.status(401).json({
+        //     code: '1',
+        //     msg: 'Invalid checksum',
+        //     data: { error: 'Checksum validation failed' },
+        //   });
+        // }
         const apitxnid = `AP${Date.now()}`;
         const bankref = `BR${Math.floor(Math.random() * 1000000000000)}`;
         const payoutTxn = new UpiTransaction_model_1.default({
@@ -279,15 +271,18 @@ const initiateBulkPayout = (req, res) => __awaiter(void 0, void 0, void 0, funct
         let failedToBatch = 0;
         for (const payout of payouts) {
             try {
-                const { merchantTransactionId, amount, beneficiaryAccount, beneficiaryIFSC, beneficiaryName, beneficiaryMobNo, payoutRemark, payoutMode, beneficiaryVPA, } = payout;
+                const { merchantTransactionId, amount, beneficiaryAccount, beneficiaryIFSC, name, mobile, payoutRemark, payoutMode, beneficiaryVPA, } = payout;
+                console.log('Validating payout:', payout);
                 if (!merchantTransactionId ||
-                    !amount ||
+                    amount === undefined || amount === null || isNaN(Number(amount)) ||
                     !beneficiaryAccount ||
                     !beneficiaryIFSC ||
-                    !beneficiaryName ||
-                    !beneficiaryMobNo ||
+                    !name ||
+                    !mobile ||
                     !payoutRemark ||
                     !payoutMode) {
+                    console.log('--->', merchantTransactionId, amount, beneficiaryAccount, beneficiaryIFSC, name, mobile, payoutRemark, payoutMode);
+                    console.warn('Payout failed validation:', payout);
                     failedToBatch++;
                     continue;
                 }
@@ -297,8 +292,8 @@ const initiateBulkPayout = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     amount,
                     beneficiaryAccount,
                     beneficiaryIFSC,
-                    beneficiaryName,
-                    beneficiaryMobNo,
+                    name,
+                    mobile,
                     payoutRemark,
                     payoutMode,
                     beneficiaryVPA,
@@ -308,7 +303,7 @@ const initiateBulkPayout = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 addedToBatch++;
             }
             catch (error) {
-                console.error('Failed to save one payout:', error);
+                console.error('Failed to save one payout:', (error === null || error === void 0 ? void 0 : error.message) || error);
                 failedToBatch++;
             }
         }
@@ -323,11 +318,11 @@ const initiateBulkPayout = (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
     catch (error) {
-        console.error('Bulk payout error:', error);
+        console.error('Bulk payout error:', (error === null || error === void 0 ? void 0 : error.message) || error);
         return res.status(500).json({
             code: '1',
             msg: 'Server error',
-            data: { error: error.message || 'Unexpected error' },
+            data: { error: (error === null || error === void 0 ? void 0 : error.message) || 'Unexpected error' },
         });
     }
 });

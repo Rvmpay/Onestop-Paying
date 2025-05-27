@@ -51,7 +51,6 @@ router.post('/initiatePayout', (req, res) => __awaiter(void 0, void 0, void 0, f
 router.post('/initiateBulkPayout', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield Upitranscation_controller_1.default.initiateBulkPayout(req, res);
-        yield Upitranscation_controller_1.default.initiateBulkPayout(req, res);
     }
     catch (error) {
         res.status(500).json({
