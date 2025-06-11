@@ -1,12 +1,25 @@
+// {
+//   "compilerOptions": {
+//     "target": "ES6",
+//     "module": "CommonJS",
+//     "outDir": "build",
+//     "rootDir": ".",
+//     "esModuleInterop": true,
+//     "strict": true
+//   },
+//   "include": ["**/*.ts"],
+//   "exclude": ["node_modules", "functions", "netlify"]
+// }
+
 {
   "compilerOptions": {
     "target": "ES6",
     "module": "CommonJS",
     "outDir": "build",
-    "rootDir": ".",
+    "rootDir": "src",
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "functions", "netlify"]
 }

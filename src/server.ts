@@ -10,7 +10,7 @@ const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:8888', // Replace with your frontend URL
+  origin: 'http://localhost:3000', // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: false
 }));
@@ -27,17 +27,11 @@ app.all('/api', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-if (process.env.NETLIFY_DEV !== 'true') {
-  console.log('Running in Netlify Dev environment');
-  connectDB();
-} else {
-  connectDB();
-  app.listen(3000, '0.0.0.0', () => {
-    console.log('Server is running on port 3000');
-  });
-  
-  console.log('Running in production environment');
-}
-
+(async () => {
+  await connectDB();                        // connect once at startup
+  app.listen(PORT, '192.168.1.9', () => {
+    console.log(`Server is running on http://192.168.1.9:${PORT}`);
+  });  
+})();
 
 export default app;

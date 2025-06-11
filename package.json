@@ -2,11 +2,11 @@
   "name": "one-stop-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts,json --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node build/index.js",
+    "start": "node build/server.js",
     "deploy": "tsc && netlify deploy --prod"
   },
   "keywords": [],
